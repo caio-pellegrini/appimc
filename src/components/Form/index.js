@@ -1,8 +1,7 @@
 import { useState } from "react";
-import { StyleSheet } from "react-native";
-import { Button, Text, TextInput, View } from "react-native";
+import { TouchableOpacity, Text, TextInput, View, Vibration } from "react-native";
 import ResultIMC from './ResultIMC';
-import { styles } from './style';
+import styles from './style';
 
 export default function Form() {
     const [altura, setAltura] = useState(null);
@@ -10,10 +9,18 @@ export default function Form() {
     const [msgIMC, setMsgIMC] = useState("Preencha a altura e o peso");
     const [IMC, setIMC] = useState(null);
     const [textButton, setTextButton] = useState("Calcular");
+    const [errorMessage, setErrorMessage] = useState(null);
+
+    function verificarIMC() {
+        if (IMC == null) {
+            Vibration.vibrate();
+            setErrorMessage("Campo Obrigatório");
+        }
+    }
 
     function calculoIMC() {
         return setIMC((peso/(altura*altura)).toFixed(2));
-    }
+    };
 
     function validarIMC() {
         if (peso != null && altura != null) {
@@ -22,41 +29,41 @@ export default function Form() {
             setPeso(null);
             setMsgIMC("Seu IMC é:");
             setTextButton("Calcular Novamente");
+            setErrorMessage(null);
             return
         }
-        setIMC(null)
-        setTextButton("Calcular")
-        setMsgIMC("Preencha o Peso e a Altura")
-    }
+        verificarIMC();
+        setIMC(null);
+        setTextButton("Calcular");
+        setMsgIMC("Preencha o Peso e a Altura");
+    };
 
     return (
-        <View>
-            <View>
-                <Text style={stylesInterno.title}>Altura</Text>
+        <View style={styles.formContext}>
+            <View style={styles.form}>
+                <Text style={styles.formLabel}>Altura</Text>
+                <Text style={styles.errorMessage}>{errorMessage}</Text>
                 <TextInput
                 style={styles.input}
                 onChangeText={setAltura}
                 value={altura}
                 placeholder="Ex: 1.75" 
-                placeholderTextColor={'red'}
                 keyboardType="numeric"></TextInput>
-                <Text style={stylesInterno.title}>Peso</Text>
+                <Text style={styles.formLabel}>Peso</Text>
+                <Text style={styles.errorMessage}>{errorMessage}</Text>
                 <TextInput 
                 style={styles.input}
                 onChangeText={setPeso} 
                 value={peso}
                 placeholder="Ex: 65" 
                 keyboardType="numeric"></TextInput>
-                <Button color={styles.button.backgroundColor} title={textButton} onPress={validarIMC}></Button>
+                <TouchableOpacity
+                style={styles.buttonCalculator}
+                onPress={() => {validarIMC()}}>
+                    <Text style={styles.textbutton}>{textButton}</Text>
+                </TouchableOpacity>
             </View>
             <ResultIMC messageResultIMC={msgIMC} resultIMC={IMC}></ResultIMC>
         </View>
     );
 }
-
-const stylesInterno = StyleSheet.create({
-    title: {
-        textAlign: 'center',
-        marginVertical: 8,
-    }
-});
